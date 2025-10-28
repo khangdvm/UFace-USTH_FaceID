@@ -7,12 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="data:,">
   <style>
-    /* Hero bên phải vẫn là ảnh; phần nền tổng thể dùng gradient */
-    .hero-bg{
-      background-image:url('images/bg.jpg');
-      background-size:cover;
-      background-position:center;
+    :root{
+      --u-blue:#2563eb;
+      --u-sky:#60a5fa;
+      --u-mint:#66e2d5;
+      --u-violet:#8b5cf6;
     }
+
+    /* ===== Base UI ===== */
     .card{border:1px solid #e5e7eb;background:#fff;border-radius:16px}
     .input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;outline:none}
     .input:focus{box-shadow:0 0 0 2px #bfdbfe;border-color:#93c5fd}
@@ -21,38 +23,221 @@
     .thumb{border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:10px}
     .thumb.active{box-shadow:inset 0 0 0 2px #3b82f6}
     .hint{color:#6b7280;font-size:12px}
+
+    /* ===== Decorative elements ===== */
+    .decor{position:fixed; inset:0; pointer-events:none; z-index:0;}
+    .blob{position:absolute; filter:blur(50px); opacity:.55; border-radius:999px; mix-blend-mode:multiply; animation:floaty 18s ease-in-out infinite;}
+    .blob-1{width:320px; height:320px; top:-60px; left:-40px; background:
+      radial-gradient(60% 60% at 50% 50%, var(--u-sky), transparent 70%),
+      radial-gradient(60% 60% at 30% 20%, var(--u-mint), transparent 70%);}
+    .blob-2{width:260px; height:260px; bottom:6%; left:26%; background:
+      radial-gradient(60% 60% at 50% 50%, var(--u-violet), transparent 70%),
+      radial-gradient(60% 60% at 70% 60%, var(--u-sky), transparent 70%); animation-delay:.8s;}
+    .blob-3{width:360px; height:360px; top:8%; right:-80px; background:
+      radial-gradient(60% 60% at 50% 50%, var(--u-mint), transparent 70%),
+      radial-gradient(60% 60% at 70% 60%, var(--u-blue), transparent 70%); animation-delay:1.5s;}
+    @keyframes floaty{0%,100%{transform:translateY(0) translateX(0) scale(1);}50%{transform:translateY(12px) translateX(6px) scale(1.03);}}
+
+    .grid-dots{position:absolute; right:0; top:0; bottom:0; width:50%;
+      background-image:radial-gradient(rgba(30,41,59,.12) 1px, transparent 1.5px);
+      background-size:18px 18px;
+      mask-image:linear-gradient(to left, rgba(0,0,0,.8), rgba(0,0,0,0));}
+
+    /* ===== Right video pane ===== */
+    .promo-wrap{
+      position:relative; width:100%; height:100%;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:24px; z-index:1;
+    }
+    .promo-intro{
+      color:#0f172a;
+      text-align:center; max-width:640px; margin-bottom:1rem;
+      font-size:1.125rem; line-height:1.75rem; font-weight:600;
+      letter-spacing:.2px;
+      opacity:0; transform: translateY(6px);
+      animation:fadeIn 1.2s ease forwards .2s;
+    }
+    @keyframes fadeIn{to{opacity:1; transform:none}}
+
+    .promo-frame{
+      position:relative; width:min(760px, 90%); aspect-ratio:16 / 9;
+      border-radius:22px; overflow:hidden; background:#000;
+      border:1px solid rgba(148,163,184,.25);
+      box-shadow:0 10px 30px rgba(0,0,0,.18), 0 0 0 8px rgba(37,99,235,.06);
+      isolation:isolate;
+    }
+    .promo-frame::before{
+      content:""; position:absolute; inset:-2px; border-radius:inherit; z-index:-1;
+      background:conic-gradient(from 0deg, var(--u-blue), var(--u-mint), var(--u-violet), var(--u-blue));
+      filter:blur(18px); opacity:.35; animation:spinSlow 18s linear infinite;
+      mask:radial-gradient(circle at center, rgba(0,0,0,0) 58%, rgba(0,0,0,1) 62%);
+    }
+    @keyframes spinSlow{to{transform:rotate(360deg);}}
+    .promo-frame video{width:100%; height:100%; object-fit:cover; display:block;}
+
+    /* Corner decorations */
+    .corner{position:absolute; width:42px; height:42px;}
+    .corner::before, .corner::after{content:""; position:absolute; background:linear-gradient(90deg, #fff, rgba(255,255,255,.3));}
+    .corner-tl{top:8px; left:8px}
+    .corner-tr{top:8px; right:8px}
+    .corner-bl{bottom:8px; left:8px}
+    .corner-br{bottom:8px; right:8px}
+    .corner-tl::before{width:28px; height:2px; left:0; top:0}
+    .corner-tl::after{width:2px; height:28px; left:0; top:0}
+    .corner-tr::before{width:28px; height:2px; right:0; top:0; background:linear-gradient(270deg,#fff,rgba(255,255,255,.3))}
+    .corner-tr::after{width:2px; height:28px; right:0; top:0}
+    .corner-bl::before{width:28px; height:2px; left:0; bottom:0}
+    .corner-bl::after{width:2px; height:28px; left:0; bottom:0; background:linear-gradient(0deg,#fff,rgba(255,255,255,.3))}
+    .corner-br::before{width:28px; height:2px; right:0; bottom:0; background:linear-gradient(270deg,#fff,rgba(255,255,255,.3))}
+    .corner-br::after{width:2px; height:28px; right:0; bottom:0; background:linear-gradient(180deg,#fff,rgba(255,255,255,.3))}
+
+    /* Motion safety */
+    @media (prefers-reduced-motion: reduce){
+      .blob, .promo-frame::before{ animation:none }
+    }
+
+    /* ======= PRO Steps – container & progress ======= */
+    .steps-wrap{
+      position:relative;
+      width:min(760px,90%);
+      margin-top:1.25rem;
+      border-radius:20px;
+      padding:16px 16px 12px;
+      background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.6));
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(148,163,184,.28);
+      box-shadow:
+        0 12px 24px rgba(15, 23, 42, .08),
+        0 2px 0 rgba(255,255,255,.6) inset;
+      overflow:hidden;
+    }
+    .steps-wrap::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:radial-gradient(rgba(99,102,241,.12) 1px, transparent 1.5px);
+      background-size:18px 18px;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0.08) 40%, rgba(0,0,0,0));
+      pointer-events:none;
+    }
+    .steps-head{
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:.5rem;
+    }
+    .steps-title{ font-weight:700; letter-spacing:.2px; color:#0f172a; }
+    .steps-progress{ display:flex; align-items:center; gap:.5rem; font-size:12px; color:#64748b; }
+    .progress-rail{
+      width:110px; height:8px; border-radius:999px;
+      background:linear-gradient(90deg, rgba(226,232,240,1), rgba(226,232,240,.7));
+      box-shadow: inset 0 1px 2px rgba(2,6,23,.06);
+      overflow:hidden;
+    }
+    .progress-bar{
+      height:100%; width:0%;
+      border-radius:inherit;
+      background:linear-gradient(90deg, var(--u-blue), var(--u-mint));
+      box-shadow: 0 0 10px rgba(102,226,213,.35);
+      transition:width .6s cubic-bezier(.2,.8,.2,1);
+    }
+
+    /* ======= Step card ======= */
+    .steps-grid{
+      position:relative; z-index:1;
+      display:grid; grid-template-columns:repeat(1,minmax(0,1fr));
+      gap:.75rem;
+    }
+    @media (min-width: 768px){
+      .steps-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); }
+    }
+    .step-card{
+      position:relative;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid rgba(203,213,225,.7);
+      padding:14px 12px;
+      box-shadow:
+        0 6px 14px rgba(15,23,42,.06),
+        0 1px 0 rgba(255,255,255,.9) inset;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .step-card::after{
+      content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:16px 16px 0 0;
+      background:linear-gradient(90deg, rgba(37,99,235,.18), rgba(102,226,213,.18));
+    }
+    .step-card:hover{
+      transform:translateY(-2px);
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.09),
+        0 1px 0 rgba(255,255,255,1) inset;
+      border-color: rgba(148,163,184,.7);
+    }
+    .step-head{ display:flex; align-items:center; gap:.55rem; margin-bottom:.15rem; }
+    .step-num{
+      display:grid; place-content:center;
+      width:28px; height:28px; border-radius:999px;
+      font-size:12px; font-weight:800;
+      color:#2563eb;
+      background:linear-gradient(180deg,#eef2ff,#ffffff);
+      border:1px solid #bfdbfe;
+      box-shadow: 0 1.5px 0 rgba(255,255,255,.9) inset, 0 2px 6px rgba(59,130,246,.18);
+    }
+    .step-title{ font-size:14px; font-weight:700; color:#0f172a; }
+    .step-desc{ font-size:12px; color:#64748b; line-height:1.3; }
+
+    /* ======= States ======= */
+    .step-card.is-active{
+      border-color: rgba(59,130,246,.55);
+      box-shadow:
+        0 10px 22px rgba(59,130,246,.12),
+        0 1px 0 rgba(255,255,255,1) inset;
+    }
+    .step-card.is-done{
+      border-color: rgba(16,185,129,.5);
+    }
+    .step-card.is-done .step-num{
+      color:#065f46; border-color:#34d399;
+      background:linear-gradient(180deg,#ecfdf5,#ffffff);
+      box-shadow: 0 1.5px 0 rgba(255,255,255,.95) inset, 0 2px 6px rgba(16,185,129,.18);
+    }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white">
-  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-    <!-- Left: Form (đặt nền bán trong suốt + blur để nổi bật trên gradient) -->
+<body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white relative">
+
+  <!-- Background decorations -->
+  <div class="decor" aria-hidden="true">
+    <div class="grid-dots"></div>
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-2 relative z-10">
+    <!-- Left: Form -->
     <div class="flex items-center justify-center p-6 lg:p-10 bg-white/70 backdrop-blur-md">
       <div class="w-full max-w-lg">
-        <!-- Logo -->
         <div class="mb-8 flex items-center gap-3">
           <img src="images/logo.png" alt="UFace Logo" class="h-10 w-auto object-contain" />
           <div class="text-2xl font-semibold tracking-tight text-blue-700">UFace</div>
         </div>
 
         <h1 class="mb-2 text-3xl font-semibold tracking-tight text-gray-900">Sign up to UFace</h1>
-        <p class="mb-8 text-sm text-gray-500">Sign up with email and take a photo of your face from all angles.</p>
+        <p class="mb-8 text-sm text-gray-600">Sign up with email and take a photo of your face from all angles.</p>
 
-        <!-- ONLY email form -->
         <form id="registerForm" class="space-y-5">
           <div>
-            <label class="mb-1 block text-sm text-gray-600">Full name</label>
+            <label class="mb-1 block text-sm text-gray-700">Full name</label>
             <input id="fullName" class="input" placeholder="VD: Nguyễn Văn A" required />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-gray-600">Student ID</label>
+            <label class="mb-1 block text-sm text-gray-700">Student ID</label>
             <input id="studentId" class="input" placeholder="VD: 23BI1204" required />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-gray-600">University email</label>
+            <label class="mb-1 block text-sm text-gray-700">University email</label>
             <input id="schoolEmail" type="email" class="input" placeholder="VD: KhaiLV@usth.edu.vn" required />
           </div>
 
-          <!-- Camera area (balanced layout) -->
+          <!-- Camera area -->
           <div class="card p-4 md:p-5 shadow-lg">
             <div class="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -65,21 +250,16 @@
               </div>
             </div>
 
-            <!-- Balanced grid: video 7/12, thumbs 5/12 -->
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-              <!-- Live camera -->
               <div class="relative col-span-7 overflow-hidden rounded-xl bg-black/5">
                 <div class="aspect-[4/3] w-full">
                   <video id="video" autoplay playsinline class="h-full w-full object-cover rounded-xl"></video>
                   <canvas id="canvas" class="hidden"></canvas>
                 </div>
-                <div class="pointer-events-none absolute left-3 top-3 rounded bg-black/50 px-2 py-1 text-xs text-white">
-                  <span id="statusBadge">Camera's off</span>
-                </div>
+                <div class="pointer-events-none absolute left-3 top-3 rounded bg-black/50 px-2 py-1 text-xs text-white"><span id="statusBadge">Camera's off</span></div>
                 <div class="pointer-events-none absolute bottom-3 right-3 rounded bg-black/50 px-2 py-1 text-xs text-white">Keep light, do not cover face</div>
               </div>
 
-              <!-- Thumbnails -->
               <div class="col-span-5">
                 <div class="grid grid-cols-2 gap-3">
                   <template id="angleCardTemplate">
@@ -87,9 +267,7 @@
                       <div class="mb-2 text-sm font-medium angle-title text-gray-700">—</div>
                       <div class="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
                         <img class="h-full w-full object-cover angle-img hidden" />
-                        <div class="absolute inset-0 grid place-content-center text-xs text-gray-400 angle-placeholder">
-                          Not taken yet
-                        </div>
+                        <div class="absolute inset-0 grid place-content-center text-xs text-gray-400 angle-placeholder">Not taken yet</div>
                       </div>
                       <div class="mt-2 flex gap-2">
                         <button type="button" class="btn-secondary text-xs angle-capture">Take</button>
@@ -106,16 +284,95 @@
           <button id="submitBtn" class="btn-primary shadow-md hover:shadow-lg transition">Sign up</button>
           <p class="text-center text-xs text-gray-500">Already have an account? <a href="#" class="text-blue-600 hover:underline">Sign in</a></p>
         </form>
-
-        <div id="toast" class="pointer-events-none fixed left-1/2 top-4 z-50 hidden -translate-x-1/2 rounded-xl bg-black px-4 py-2 text-sm text-white"></div>
       </div>
     </div>
 
-    <!-- Right: Hero image -->
-    <div class="hero-bg hidden lg:block"></div>
+    <!-- Right: Hero video + intro + steps -->
+    <div class="hidden lg:block">
+      <div class="promo-wrap">
+        <p class="promo-intro">
+          A face recognition system for USTH students — enabling smart attendance and secure identity verification.
+        </p>
+
+        <!-- Video -->
+        <div class="promo-frame">
+          <video autoplay muted loop playsinline preload="metadata" poster="images/bg.jpg">
+            <source src="videos/hero.webm" type="video/webm" />
+            <source src="videos/hero.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div class="corner corner-tl"></div>
+          <div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div>
+          <div class="corner corner-br"></div>
+        </div>
+
+        <!-- Steps (pro) -->
+        <section class="steps-wrap">
+          <div class="steps-head">
+            <h3 class="steps-title text-lg">Steps to Face Recognition</h3>
+            <div class="steps-progress">
+              <span id="stepsProgressLabel">0/5</span>
+              <div class="progress-rail">
+                <div id="stepsProgressBar" class="progress-bar"></div>
+              </div>
+            </div>
+          </div>
+
+          <ol id="stepsList" class="steps-grid">
+            <li class="step-card" data-step="1">
+              <div class="step-head">
+                <span class="step-num">1</span>
+                <span class="step-title">Enroll</span>
+              </div>
+              <p class="step-desc">Create your profile with student info.</p>
+            </li>
+
+            <li class="step-card" data-step="2">
+              <div class="step-head">
+                <span class="step-num">2</span>
+                <span class="step-title">Capture</span>
+              </div>
+              <p class="step-desc">Take 5 angles: front, left, right, up, down.</p>
+            </li>
+
+            <li class="step-card" data-step="3">
+              <div class="step-head">
+                <span class="step-num">3</span>
+                <span class="step-title">Train</span>
+              </div>
+              <p class="step-desc">System builds your face embedding securely.</p>
+            </li>
+
+            <li class="step-card" data-step="4">
+              <div class="step-head">
+                <span class="step-num">4</span>
+                <span class="step-title">Verify</span>
+              </div>
+              <p class="step-desc">Match your face to confirm identity.</p>
+            </li>
+
+            <li class="step-card" data-step="5">
+              <div class="step-head">
+                <span class="step-num">5</span>
+                <span class="step-title">Attendance</span>
+              </div>
+              <p class="step-desc">Check-in automatically during classes.</p>
+            </li>
+          </ol>
+
+          <p class="mt-3 text-[13px] text-slate-500 relative z-10">
+            Tip: use a well-lit environment, remove masks/glasses if possible for best accuracy.
+          </p>
+        </section>
+      </div>
+    </div>
   </div>
 
-  <!-- ==== JS giữ nguyên logic ==== -->
+  <!-- Toast -->
+  <div id="toast" class="pointer-events-none fixed left-1/2 top-4 z-50 hidden -translate-x-1/2 rounded-xl bg-black px-4 py-2 text-sm text-white"></div>
+
+  <!-- ===== Capture + Steps logic ===== -->
   <script>
     const angles = [
       { key: 'front', title: 'Front' },
@@ -137,6 +394,11 @@
     const form = document.getElementById('registerForm');
     const toast = document.getElementById('toast');
     const submitBtn = document.getElementById('submitBtn');
+
+    // Steps progress refs
+    const stepsProgressBar = document.getElementById('stepsProgressBar');
+    const stepsProgressLabel = document.getElementById('stepsProgressLabel');
+    const stepEls = Array.from(document.querySelectorAll('.step-card'));
 
     function showToast(msg, ms=2000){toast.textContent=msg;toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),ms)}
     function setBadge(text){statusBadge.textContent=text}
@@ -187,6 +449,37 @@
       return f ? f[0] : 'front';
     }
 
+    function setStepState(stepIndex, state){ // '', 'is-active', 'is-done'
+      const el = stepEls[stepIndex-1];
+      if(!el) return;
+      el.classList.remove('is-active','is-done');
+      if(state) el.classList.add(state);
+    }
+    function markLinearState(currentDone){ // done 0..5
+      stepEls.forEach((_,i)=>{
+        if(i < currentDone) setStepState(i+1,'is-done');
+        else if(i === currentDone) setStepState(i+1,'is-active');
+        else setStepState(i+1,'');
+      });
+    }
+
+    function updateStepsProgress(){
+      // Enroll considered done when 3 inputs filled
+      const enrolled = !!document.getElementById('fullName').value.trim()
+                    && !!document.getElementById('studentId').value.trim()
+                    && !!document.getElementById('schoolEmail').value.trim();
+      const taken = ['front','left','right','up','down'].filter(k => !!captures[k]).length;
+
+      let done = 0;
+      if(enrolled) done = 1;
+      if(taken === 5) done = Math.max(done, 2);
+
+      const pct = (done/5)*100;
+      stepsProgressBar.style.width = pct + '%';
+      stepsProgressLabel.textContent = `${done}/5`;
+      markLinearState(done);
+    }
+
     async function captureCurrent(){
       const key = currentActiveKey();
       await captureAngle(key);
@@ -212,11 +505,17 @@
       refs.btnRetake.classList.remove('hidden');
       highlightActive(key);
       showToast(`Captured: ${angles.find(a=>a.key===key).title}`);
+
+      updateStepsProgress();
     }
 
     openCameraBtn.addEventListener('click', openCamera);
     captureBtn.addEventListener('click', captureCurrent);
     Object.entries(angleCards).forEach(([k,refs])=>refs.wrap.addEventListener('click',()=>highlightActive(k)));
+
+    ['fullName','studentId','schoolEmail'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', updateStepsProgress);
+    });
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -235,6 +534,12 @@
         const res = await fetch('/api/register',{method:'POST',body:fd});
         if(!res.ok) throw new Error(await res.text());
         showToast('Registered successfully!');
+
+        // Success → full 5/5
+        stepsProgressBar.style.width = '100%';
+        stepsProgressLabel.textContent = '5/5';
+        markLinearState(5);
+
         e.target.reset();
       }catch(err){
         console.error(err);
