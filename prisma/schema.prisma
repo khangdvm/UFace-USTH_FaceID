@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id           Int        @id @default(autoincrement())
+  fullName     String
+  studentId    String     @unique
+  schoolEmail  String     @unique
+  status       String     @default("active")
+  createdAt    DateTime   @default(now())
+  faceImages   FaceImage[]
+}
+
+model FaceImage {
+  id         Int       @id @default(autoincrement())
+  studentId  Int
+  angle      FaceAngle
+  filePath   String
+  embedding  Json?
+  createdAt  DateTime  @default(now())
+
+  student    Student   @relation(fields: [studentId], references: [id])
+}
+
+enum FaceAngle {
+  FRONT
+  LEFT
+  RIGHT
+  UP
+  DOWN
+}

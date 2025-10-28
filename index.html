@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UFace – Register for identification</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="data:,">
+  <style>
+    /* Hero bên phải vẫn là ảnh; phần nền tổng thể dùng gradient */
+    .hero-bg{
+      background-image:url('images/bg.jpg');
+      background-size:cover;
+      background-position:center;
+    }
+    .card{border:1px solid #e5e7eb;background:#fff;border-radius:16px}
+    .input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;outline:none}
+    .input:focus{box-shadow:0 0 0 2px #bfdbfe;border-color:#93c5fd}
+    .btn-primary{width:100%;border-radius:12px;background:#2563eb;color:#fff;padding:12px 16px;font-weight:600}
+    .btn-secondary{border:1px solid #d1d5db;border-radius:10px;padding:8px 12px;font-weight:500}
+    .thumb{border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:10px}
+    .thumb.active{box-shadow:inset 0 0 0 2px #3b82f6}
+    .hint{color:#6b7280;font-size:12px}
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white">
+  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+    <!-- Left: Form (đặt nền bán trong suốt + blur để nổi bật trên gradient) -->
+    <div class="flex items-center justify-center p-6 lg:p-10 bg-white/70 backdrop-blur-md">
+      <div class="w-full max-w-lg">
+        <!-- Logo -->
+        <div class="mb-8 flex items-center gap-3">
+          <img src="images/logo.png" alt="UFace Logo" class="h-10 w-auto object-contain" />
+          <div class="text-2xl font-semibold tracking-tight text-blue-700">UFace</div>
+        </div>
+
+        <h1 class="mb-2 text-3xl font-semibold tracking-tight text-gray-900">Sign up to UFace</h1>
+        <p class="mb-8 text-sm text-gray-500">Sign up with email and take a photo of your face from all angles.</p>
+
+        <!-- ONLY email form -->
+        <form id="registerForm" class="space-y-5">
+          <div>
+            <label class="mb-1 block text-sm text-gray-600">Full name</label>
+            <input id="fullName" class="input" placeholder="VD: Nguyễn Văn A" required />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-gray-600">Student ID</label>
+            <input id="studentId" class="input" placeholder="VD: 23BI1204" required />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-gray-600">University email</label>
+            <input id="schoolEmail" type="email" class="input" placeholder="VD: KhaiLV@usth.edu.vn" required />
+          </div>
+
+          <!-- Camera area (balanced layout) -->
+          <div class="card p-4 md:p-5 shadow-lg">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-base font-semibold">Face Photo (5 Angles)</div>
+                <div id="angleHint" class="hint">Tap “Open Camera” to get started.</div>
+              </div>
+              <div class="flex gap-2">
+                <button id="openCameraBtn" type="button" class="btn-secondary">Open camera</button>
+                <button id="captureBtn" type="button" class="btn-secondary hidden">Take a picture</button>
+              </div>
+            </div>
+
+            <!-- Balanced grid: video 7/12, thumbs 5/12 -->
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+              <!-- Live camera -->
+              <div class="relative col-span-7 overflow-hidden rounded-xl bg-black/5">
+                <div class="aspect-[4/3] w-full">
+                  <video id="video" autoplay playsinline class="h-full w-full object-cover rounded-xl"></video>
+                  <canvas id="canvas" class="hidden"></canvas>
+                </div>
+                <div class="pointer-events-none absolute left-3 top-3 rounded bg-black/50 px-2 py-1 text-xs text-white">
+                  <span id="statusBadge">Camera's off</span>
+                </div>
+                <div class="pointer-events-none absolute bottom-3 right-3 rounded bg-black/50 px-2 py-1 text-xs text-white">Keep light, do not cover face</div>
+              </div>
+
+              <!-- Thumbnails -->
+              <div class="col-span-5">
+                <div class="grid grid-cols-2 gap-3">
+                  <template id="angleCardTemplate">
+                    <div class="thumb hover:shadow-md transition">
+                      <div class="mb-2 text-sm font-medium angle-title text-gray-700">—</div>
+                      <div class="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+                        <img class="h-full w-full object-cover angle-img hidden" />
+                        <div class="absolute inset-0 grid place-content-center text-xs text-gray-400 angle-placeholder">
+                          Not taken yet
+                        </div>
+                      </div>
+                      <div class="mt-2 flex gap-2">
+                        <button type="button" class="btn-secondary text-xs angle-capture">Take</button>
+                        <button type="button" class="btn-secondary text-xs angle-retake hidden">Retake</button>
+                      </div>
+                    </div>
+                  </template>
+                  <div id="anglesContainer" class="grid grid-cols-2 gap-3 col-span-2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="submitBtn" class="btn-primary shadow-md hover:shadow-lg transition">Sign up</button>
+          <p class="text-center text-xs text-gray-500">Already have an account? <a href="#" class="text-blue-600 hover:underline">Sign in</a></p>
+        </form>
+
+        <div id="toast" class="pointer-events-none fixed left-1/2 top-4 z-50 hidden -translate-x-1/2 rounded-xl bg-black px-4 py-2 text-sm text-white"></div>
+      </div>
+    </div>
+
+    <!-- Right: Hero image -->
+    <div class="hero-bg hidden lg:block"></div>
+  </div>
+
+  <!-- ==== JS giữ nguyên logic ==== -->
+  <script>
+    const angles = [
+      { key: 'front', title: 'Front' },
+      { key: 'left',  title: 'Lean left' },
+      { key: 'right', title: 'Lean right' },
+      { key: 'up',    title: 'Look up' },
+      { key: 'down',  title: 'Bend slightly' },
+    ];
+    const captures = {};
+    let stream = null;
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const statusBadge = document.getElementById('statusBadge');
+    const angleHint = document.getElementById('angleHint');
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const anglesContainer = document.getElementById('anglesContainer');
+    const form = document.getElementById('registerForm');
+    const toast = document.getElementById('toast');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showToast(msg, ms=2000){toast.textContent=msg;toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),ms)}
+    function setBadge(text){statusBadge.textContent=text}
+
+    const tpl = document.getElementById('angleCardTemplate');
+    const angleCards = {};
+    angles.forEach((a, idx) => {
+      const node = tpl.content.cloneNode(true);
+      const wrap = node.querySelector('.thumb');
+      const title = node.querySelector('.angle-title');
+      const img = node.querySelector('.angle-img');
+      const ph = node.querySelector('.angle-placeholder');
+      const btnCap = node.querySelector('.angle-capture');
+      const btnRetake = node.querySelector('.angle-retake');
+
+      title.textContent = `${idx+1}. ${a.title}`;
+      btnCap.addEventListener('click', () => captureAngle(a.key));
+      btnRetake.addEventListener('click', () => captureAngle(a.key));
+
+      anglesContainer.appendChild(node);
+      angleCards[a.key] = { wrap: anglesContainer.lastElementChild, img, ph, btnCap, btnRetake };
+    });
+
+    function highlightActive(key){
+      Object.entries(angleCards).forEach(([k,refs])=>refs.wrap.classList.toggle('active',k===key))
+    }
+
+    async function openCamera(){
+      if(stream) return;
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({
+          video:{width:{ideal:1280},height:{ideal:720},facingMode:'user'},audio:false
+        });
+        video.srcObject = stream;
+        setBadge("Camera's on");
+        captureBtn.classList.remove('hidden');
+        angleHint.textContent = 'Select the box or press “Take” to capture each angle.';
+        highlightActive('front');
+      }catch(e){
+        console.error(e);
+        showToast('Unable to open camera. Use HTTPS/localhost and grant permission.');
+        setBadge('Camera error');
+      }
+    }
+
+    function currentActiveKey(){
+      const f = Object.entries(angleCards).find(([k,r])=>r.wrap.classList.contains('active'));
+      return f ? f[0] : 'front';
+    }
+
+    async function captureCurrent(){
+      const key = currentActiveKey();
+      await captureAngle(key);
+      const next = angles.find(a=>!captures[a.key]);
+      if(next) highlightActive(next.key); else showToast('Captured all 5 angles 👌');
+    }
+
+    async function captureAngle(key){
+      if(!stream){showToast('Open the camera first');return;}
+      const track = stream.getVideoTracks()[0];
+      const w = track.getSettings().width || 1280;
+      const h = track.getSettings().height || 720;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video,0,0,w,h);
+      const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.92));
+      captures[key]=blob;
+
+      const refs = angleCards[key];
+      refs.img.src = URL.createObjectURL(blob);
+      refs.img.classList.remove('hidden');
+      refs.ph.classList.add('hidden');
+      refs.btnRetake.classList.remove('hidden');
+      highlightActive(key);
+      showToast(`Captured: ${angles.find(a=>a.key===key).title}`);
+    }
+
+    openCameraBtn.addEventListener('click', openCamera);
+    captureBtn.addEventListener('click', captureCurrent);
+    Object.entries(angleCards).forEach(([k,refs])=>refs.wrap.addEventListener('click',()=>highlightActive(k)));
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!captures.front||!captures.left||!captures.right||!captures.up||!captures.down){
+        showToast('Please capture all 5 angles.'); return;
+      }
+      submitBtn.disabled=true; submitBtn.textContent='Submitting...';
+
+      const fd = new FormData();
+      fd.append('full_name', document.getElementById('fullName').value.trim());
+      fd.append('student_id', document.getElementById('studentId').value.trim());
+      fd.append('school_email', document.getElementById('schoolEmail').value.trim());
+      Object.entries(captures).forEach(([k,blob])=>fd.append(`face_${k}`,blob,`${k}.jpg`));
+
+      try{
+        const res = await fetch('/api/register',{method:'POST',body:fd});
+        if(!res.ok) throw new Error(await res.text());
+        showToast('Registered successfully!');
+        e.target.reset();
+      }catch(err){
+        console.error(err);
+        showToast('Submit failed. Please check server.');
+      }finally{
+        submitBtn.disabled=false; submitBtn.textContent='Sign up';
+      }
+    });
+
+    window.addEventListener('beforeunload',()=>{if(stream) stream.getTracks().forEach(t=>t.stop());});
+  </script>
+</body>
+</html>
