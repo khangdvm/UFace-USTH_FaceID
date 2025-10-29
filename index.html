@@ -7,9 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="data:,">
   <style>
-    :root{
-      --u-blue:#2563eb; --u-sky:#60a5fa; --u-mint:#66e2d5; --u-violet:#8b5cf6;
-    }
+    :root{ --u-blue:#2563eb; --u-sky:#60a5fa; --u-mint:#66e2d5; --u-violet:#8b5cf6; }
+    /* ===== Base UI ===== */
     .card{border:1px solid #e5e7eb;background:#fff;border-radius:16px}
     .input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;outline:none}
     .input:focus{box-shadow:0 0 0 2px #bfdbfe;border-color:#93c5fd}
@@ -19,6 +18,7 @@
     .thumb.active{box-shadow:inset 0 0 0 2px #3b82f6}
     .hint{color:#6b7280;font-size:12px}
 
+    /* ===== Background decorations ===== */
     .decor{position:fixed; inset:0; pointer-events:none; z-index:0;}
     .blob{position:absolute; filter:blur(50px); opacity:.55; border-radius:999px; mix-blend-mode:multiply; animation:floaty 18s ease-in-out infinite;}
     .blob-1{width:320px; height:320px; top:-60px; left:-40px; background:
@@ -30,23 +30,37 @@
     .blob-3{width:360px; height:360px; top:8%; right:-80px; background:
       radial-gradient(60% 60% at 50% 50%, var(--u-mint), transparent 70%),
       radial-gradient(60% 60% at 70% 60%, var(--u-blue), transparent 70%); animation-delay:1.5s;}
-    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+    @keyframes floaty{0%,100%{transform:translateY(0) translateX(0) scale(1);}50%{transform:translateY(12px) translateX(6px) scale(1.03);}}
 
     .grid-dots{position:absolute; right:0; top:0; bottom:0; width:50%;
       background-image:radial-gradient(rgba(30,41,59,.12) 1px, transparent 1.5px);
       background-size:18px 18px;
       mask-image:linear-gradient(to left, rgba(0,0,0,.8), rgba(0,0,0,0));}
 
+    /* ===== Right video pane (optimized) ===== */
     .promo-wrap{position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:24px; z-index:1;}
-    .promo-intro{color:#0f172a; text-align:center; max-width:640px; margin:0 auto .5rem; font-size:1.125rem; line-height:1.75rem; font-weight:600; letter-spacing:.2px;}
+    .promo-intro{color:#0f172a; text-align:center; max-width:640px; margin:0 auto .5rem; font-size:1.125rem; line-height:1.75rem; font-weight:600; letter-spacing:.2px; opacity:0; transform: translateY(6px); animation:fadeIn 1.2s ease forwards .2s;}
+    @keyframes fadeIn{to{opacity:1; transform:none}}
 
     .promo-frame{
       position:relative; width:min(720px,88%); aspect-ratio:16/9; margin-inline:auto;
       border-radius:20px; overflow:hidden; background:#0b1220;
+      --g: conic-gradient(from 0deg, #2563eb, #66e2d5, #8b5cf6, #2563eb);
       border:1px solid rgba(148,163,184,.28);
-      box-shadow:0 10px 30px rgba(2,6,23,.22);
+      box-shadow:0 10px 30px rgba(2,6,23,.22), 0 0 0 6px rgba(37,99,235,.05);
+      isolation:isolate; will-change:transform; contain:paint;
     }
-    .promo-frame video{width:100%; height:100%; object-fit:cover; display:block;}
+    .promo-frame::before{
+      content:""; position:absolute; inset:0; padding:2px; border-radius:inherit; background:var(--g);
+      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor; mask-composite:exclude; opacity:.65; animation:spinSlow 16s linear infinite;
+    }
+    @keyframes spinSlow{to{transform:rotate(360deg)}}
+    .promo-frame::after{
+      content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1.6px);
+      background-size:18px 18px; opacity:.25; mask-image:linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,.1)); pointer-events:none;
+    }
+    .promo-frame video{width:100%; height:100%; object-fit:cover; display:block; filter:contrast(1.05) saturate(1.03);}
     .corner{position:absolute; width:40px; height:40px; pointer-events:none}
     .corner::before,.corner::after{content:""; position:absolute; background:linear-gradient(90deg,#fff,rgba(255,255,255,.28))}
     .corner-tl{top:10px; left:10px}.corner-tr{top:10px; right:10px}.corner-bl{bottom:10px; left:10px}.corner-br{bottom:10px; right:10px}
@@ -57,10 +71,48 @@
     .corner-bl::after{width:1.5px;height:26px;left:0;bottom:0;background:linear-gradient(0deg,#fff,rgba(255,255,255,.28))}
     .corner-br::before{width:26px;height:1.5px;right:0;bottom:0;background:linear-gradient(270deg,#fff,rgba(255,255,255,.28))}
     .corner-br::after{width:1.5px;height:26px;right:0;bottom:0;background:linear-gradient(180deg,#fff,rgba(255,255,255,.28))}
+    @media (hover:hover){
+      .promo-frame{transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s}
+      .promo-frame:hover{transform:translateY(-2px) rotateX(0.5deg) rotateY(-0.6deg); box-shadow:0 16px 36px rgba(2,6,23,.28), 0 0 0 8px rgba(37,99,235,.08)}
+    }
+    @media (prefers-reduced-motion:reduce){.promo-frame::before{animation:none} .blob{animation:none}}
+
+    /* ===== FacePhoto card wider than inputs ===== */
+    #faceCard{width:100%;}
+    @media (min-width:1024px){
+      #faceCard{width:130%; margin-left:-10%;}
+    }
+
+    /* ===== Steps styles ===== */
+    .steps-wrap{position:relative; width:min(760px,90%); margin-top:1.25rem; border-radius:20px; padding:16px 16px 12px;
+      background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.6));
+      backdrop-filter:blur(8px); border:1px solid rgba(148,163,184,.28);
+      box-shadow:0 12px 24px rgba(15,23,42,.08), 0 2px 0 rgba(255,255,255,.6) inset; overflow:hidden;}
+    .steps-wrap::before{content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(99,102,241,.12) 1px, transparent 1.5px);
+      background-size:18px 18px; mask-image:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0.08) 40%, rgba(0,0,0,0)); pointer-events:none;}
+    .steps-head{position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem;}
+    .steps-title{font-weight:700; letter-spacing:.2px; color:#0f172a;}
+    .steps-progress{display:flex; align-items:center; gap:.5rem; font-size:12px; color:#64748b;}
+    .progress-rail{width:110px;height:8px;border-radius:999px;background:linear-gradient(90deg,#e2e8f0,#e2e8f0b3); box-shadow:inset 0 1px 2px rgba(2,6,23,.06); overflow:hidden;}
+    .progress-bar{height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--u-blue),var(--u-mint)); box-shadow:0 0 10px rgba(102,226,213,.35); transition:width .6s cubic-bezier(.2,.8,.2,1);}
+    .steps-grid{position:relative; z-index:1; display:grid; grid-template-columns:repeat(1,minmax(0,1fr)); gap:.75rem;}
+    @media (min-width:768px){.steps-grid{grid-template-columns:repeat(5,minmax(0,1fr));}}
+    .step-card{position:relative; border-radius:16px; background:#fff; border:1px solid rgba(203,213,225,.7); padding:14px 12px;
+      box-shadow:0 6px 14px rgba(15,23,42,.06), 0 1px 0 rgba(255,255,255,1) inset; transition: transform .25s, box-shadow .25s, border-color .25s;}
+    .step-card::after{content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:16px 16px 0 0; background:linear-gradient(90deg, rgba(37,99,235,.18), rgba(102,226,213,.18));}
+    .step-card:hover{transform:translateY(-2px); box-shadow:0 10px 22px rgba(15,23,42,.09), 0 1px 0 rgba(255,255,255,1) inset; border-color:rgba(148,163,184,.7);}
+    .step-head{display:flex; align-items:center; gap:.55rem; margin-bottom:.15rem;}
+    .step-num{display:grid; place-content:center; width:28px; height:28px; border-radius:999px; font-size:12px; font-weight:800; color:#2563eb; background:linear-gradient(180deg,#eef2ff,#ffffff); border:1px solid #bfdbfe; box-shadow:0 1.5px 0 rgba(255,255,255,.95) inset, 0 2px 6px rgba(59,130,246,.18);}
+    .step-title{font-size:14px; font-weight:700; color:#0f172a;}
+    .step-desc{font-size:12px; color:#64748b; line-height:1.3;}
+    .step-card.is-active{border-color:rgba(59,130,246,.55); box-shadow:0 10px 22px rgba(59,130,246,.12), 0 1px 0 rgba(255,255,255,1) inset;}
+    .step-card.is-done{border-color:rgba(16,185,129,.5);}
+    .step-card.is-done .step-num{color:#065f46; border-color:#34d399; background:linear-gradient(180deg,#ecfdf5,#ffffff); box-shadow:0 1.5px 0 rgba(255,255,255,.95) inset, 0 2px 6px rgba(16,185,129,.18);}
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white relative">
 
+  <!-- Background decorations -->
   <div class="decor" aria-hidden="true">
     <div class="grid-dots"></div>
     <span class="blob blob-1"></span>
@@ -69,6 +121,7 @@
   </div>
 
   <div class="grid min-h-screen grid-cols-1 lg:grid-cols-2 relative z-10">
+    <!-- Left: Form -->
     <div class="flex items-center justify-center p-6 lg:p-10 bg-white/70 backdrop-blur-md">
       <div class="w-full max-w-lg">
         <div class="mb-8 flex items-center gap-3">
@@ -76,24 +129,24 @@
           <div class="text-2xl font-semibold tracking-tight text-blue-700">UFace</div>
         </div>
 
-        <h1 class="mb-2 text-3xl font-semibold text-gray-900">Sign up to UFace</h1>
+        <h1 class="mb-2 text-3xl font-semibold tracking-tight text-gray-900">Sign up to UFace</h1>
         <p class="mb-8 text-sm text-gray-600">Sign up with email and take a photo of your face from all angles.</p>
 
         <form id="registerForm" class="space-y-5">
           <div>
             <label class="mb-1 block text-sm text-gray-700">Full name</label>
-            <input id="fullName" class="input" placeholder="VD: Nguyễn Văn A" required />
+            <input id="fullName" class="input" placeholder="VD: Lê Vĩnh Khải" required />
           </div>
           <div>
             <label class="mb-1 block text-sm text-gray-700">Student ID</label>
             <input id="studentId" class="input" placeholder="VD: 23BI1204" required />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-gray-700">Student email</label>
+            <label class="mb-1 block text-sm text-gray-700"> Student email</label>
             <input id="schoolEmail" type="email" class="input" placeholder="VD: KhaiLV@usth.edu.vn" required />
           </div>
 
-          <!-- Camera -->
+          <!-- Camera area (keep original size, fill video) -->
           <div id="faceCard" class="card p-4 md:p-5 shadow-lg">
             <div class="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -106,22 +159,35 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 items-stretch">
-              <!-- Camera section -->
-              <div class="relative col-span-7 overflow-hidden rounded-xl bg-black/5 h-full">
-                <div class="relative w-full h-full min-h-[360px] md:min-h-[420px] lg:min-h-[520px] rounded-xl overflow-hidden">
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+              <!-- ✅ self-start ngăn stretch theo chiều cao hàng -->
+              <div class="relative col-span-7 overflow-hidden rounded-xl bg-black/5 self-start">
+                <!-- Giữ kích thước cũ -->
+                <div class="relative w-full h-[360px] md:h-[420px] lg:h-[460px] rounded-xl overflow-hidden">
+                  <!-- Video fill full khung -->
                   <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover rounded-xl"></video>
                   <canvas id="canvas" class="hidden"></canvas>
                 </div>
+
                 <div class="pointer-events-none absolute left-3 top-3 rounded bg-black/50 px-2 py-1 text-xs text-white">
                   <span id="statusBadge">Camera's off</span>
                 </div>
                 <div class="pointer-events-none absolute bottom-3 right-3 rounded bg-black/50 px-2 py-1 text-xs text-white">
                   Keep light, do not cover face
                 </div>
+
+                <!-- 📸 Tips (English) -->
+                <div class="mt-3 rounded-xl border border-gray-200 bg-white/70 p-3">
+                  <div class="mb-2 text-[13px] font-semibold text-slate-800">Tips for better face photos</div>
+                  <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[12px] text-slate-600">
+                    <li class="flex items-start gap-2"><span></span><span>Use even lighting and avoid backlight.</span></li>
+                    <li class="flex items-start gap-2"><span></span><span>Remove masks, glasses, or hats if possible.</span></li>
+                    <li class="flex items-start gap-2"><span></span><span>Keep your face centered; don’t cut forehead or chin.</span></li>
+                    <li class="flex items-start gap-2"><span></span><span>Hold the device about 40–60&nbsp;cm away.</span></li>
+                  </ul>
+                </div>
               </div>
 
-              <!-- Thumbnails -->
               <div class="col-span-5">
                 <div class="grid grid-cols-2 gap-3">
                   <template id="angleCardTemplate">
@@ -144,31 +210,57 @@
           </div>
 
           <button id="submitBtn" class="btn-primary shadow-md hover:shadow-lg transition">Sign up</button>
+          <!-- Sign in prompt removed -->
         </form>
       </div>
     </div>
 
+    <!-- Right: Hero + steps -->
     <div class="hidden lg:block">
       <div class="promo-wrap">
         <p class="promo-intro">
           A face recognition system for USTH students — enabling smart attendance and secure identity verification.
         </p>
+
         <div class="promo-frame">
           <video autoplay muted loop playsinline preload="metadata" poster="images/bg.jpg">
             <source src="videos/hero.webm" type="video/webm" />
             <source src="videos/hero.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
           </video>
           <div class="corner corner-tl"></div>
           <div class="corner corner-tr"></div>
           <div class="corner corner-bl"></div>
           <div class="corner corner-br"></div>
         </div>
+
+        <section class="steps-wrap">
+          <div class="steps-head">
+            <h3 class="steps-title text-lg">Steps to Face Recognition</h3>
+            <div class="steps-progress">
+              <span id="stepsProgressLabel">0/5</span>
+              <div class="progress-rail"><div id="stepsProgressBar" class="progress-bar"></div></div>
+            </div>
+          </div>
+
+          <ol id="stepsList" class="steps-grid">
+            <li class="step-card" data-step="1"><div class="step-head"><span class="step-num">1</span><span class="step-title">Enroll</span></div><p class="step-desc">Create your profile with student info.</p></li>
+            <li class="step-card" data-step="2"><div class="step-head"><span class="step-num">2</span><span class="step-title">Capture</span></div><p class="step-desc">Take 5 angles: front, left, right, up, down.</p></li>
+            <li class="step-card" data-step="3"><div class="step-head"><span class="step-num">3</span><span class="step-title">Train</span></div><p class="step-desc">System builds your face embedding securely.</p></li>
+            <li class="step-card" data-step="4"><div class="step-head"><span class="step-num">4</span><span class="step-title">Verify</span></div><p class="step-desc">Match your face to confirm identity.</p></li>
+            <li class="step-card" data-step="5"><div class="step-head"><span class="step-num">5</span><span class="step-title">Attendance</span></div><p class="step-desc">Check-in automatically during classes.</p></li>
+          </ol>
+
+          <p class="mt-3 text-[13px] text-slate-500 relative z-10">Tip: use a well-lit environment, remove masks/glasses if possible for best accuracy.</p>
+        </section>
       </div>
     </div>
   </div>
 
+  <!-- Toast -->
   <div id="toast" class="pointer-events-none fixed left-1/2 top-4 z-50 hidden -translate-x-1/2 rounded-xl bg-black px-4 py-2 text-sm text-white"></div>
 
+  <!-- ===== Capture + Steps logic + Promo saver ===== -->
   <script>
     const angles = [
       { key: 'front', title: 'Front' },
@@ -179,61 +271,182 @@
     ];
     const captures = {};
     let stream = null;
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
+    const statusBadge = document.getElementById('statusBadge');
+    const angleHint = document.getElementById('angleHint');
     const openCameraBtn = document.getElementById('openCameraBtn');
     const captureBtn = document.getElementById('captureBtn');
-    const statusBadge = document.getElementById('statusBadge');
+    const anglesContainer = document.getElementById('anglesContainer');
+    const form = document.getElementById('registerForm');
     const toast = document.getElementById('toast');
+    const submitBtn = document.getElementById('submitBtn');
 
-    function showToast(msg, ms=2000){toast.textContent=msg;toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),ms);}
+    const stepsProgressBar = document.getElementById('stepsProgressBar');
+    const stepsProgressLabel = document.getElementById('stepsProgressLabel');
+    const stepEls = Array.from(document.querySelectorAll('.step-card'));
+
+    function showToast(msg, ms=2000){toast.textContent=msg;toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),ms)}
+    function setBadge(text){statusBadge.textContent=text}
+
+    const tpl = document.getElementById('angleCardTemplate');
+    const angleCards = {};
+    angles.forEach((a, idx) => {
+      const node = tpl.content.cloneNode(true);
+      const wrap = node.querySelector('.thumb');
+      const title = node.querySelector('.angle-title');
+      const img = node.querySelector('.angle-img');
+      const ph = node.querySelector('.angle-placeholder');
+      const btnCap = node.querySelector('.angle-capture');
+      const btnRetake = node.querySelector('.angle-retake');
+
+      title.textContent = `${idx+1}. ${a.title}`;
+      btnCap.addEventListener('click', () => captureAngle(a.key));
+      btnRetake.addEventListener('click', () => captureAngle(a.key));
+
+      anglesContainer.appendChild(node);
+      angleCards[a.key] = { wrap: anglesContainer.lastElementChild, img, ph, btnCap, btnRetake };
+    });
+
+    function highlightActive(key){
+      Object.entries(angleCards).forEach(([k,refs])=>refs.wrap.classList.toggle('active',k===key))
+    }
+
     async function openCamera(){
       if(stream) return;
       try{
-        stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+        stream = await navigator.mediaDevices.getUserMedia({
+          video:{width:{ideal:1280},height:{ideal:720},facingMode:'user'},audio:false
+        });
         video.srcObject = stream;
-        statusBadge.textContent="Camera's on";
+        setBadge("Camera's on");
         captureBtn.classList.remove('hidden');
-      }catch(e){showToast('Cannot access camera. Allow permission.');statusBadge.textContent='Camera error';}
+        angleHint.textContent = 'Select the box or press “Take” to capture each angle.';
+        highlightActive('front');
+      }catch(e){
+        console.error(e);
+        showToast('Unable to open camera. Use HTTPS/localhost and grant permission.');
+        setBadge('Camera error');
+      }
     }
 
-    const tpl=document.getElementById('angleCardTemplate');
-    const anglesContainer=document.getElementById('anglesContainer');
-    const angleCards={};
-    angles.forEach((a,i)=>{
-      const node=tpl.content.cloneNode(true);
-      const wrap=node.querySelector('.thumb');
-      const title=node.querySelector('.angle-title');
-      const img=node.querySelector('.angle-img');
-      const ph=node.querySelector('.angle-placeholder');
-      const btnCap=node.querySelector('.angle-capture');
-      const btnRetake=node.querySelector('.angle-retake');
-      title.textContent=`${i+1}. ${a.title}`;
-      btnCap.addEventListener('click',()=>captureAngle(a.key));
-      btnRetake.addEventListener('click',()=>captureAngle(a.key));
-      anglesContainer.appendChild(node);
-      angleCards[a.key]={img,ph,btnCap,btnRetake};
-    });
+    function currentActiveKey(){
+      const f = Object.entries(angleCards).find(([k,r])=>r.wrap.classList.contains('active'));
+      return f ? f[0] : 'front';
+    }
+
+    function setStepState(stepIndex, state){
+      const el = stepEls[stepIndex-1];
+      if(!el) return;
+      el.classList.remove('is-active','is-done');
+      if(state) el.classList.add(state);
+    }
+    function markLinearState(currentDone){
+      stepEls.forEach((_,i)=>{
+        if(i < currentDone) setStepState(i+1,'is-done');
+        else if(i === currentDone) setStepState(i+1,'is-active');
+        else setStepState(i+1,'');
+      });
+    }
+
+    function updateStepsProgress(){
+      const enrolled = !!document.getElementById('fullName').value.trim()
+                    && !!document.getElementById('studentId').value.trim()
+                    && !!document.getElementById('schoolEmail').value.trim();
+      const taken = ['front','left','right','up','down'].filter(k => !!captures[k]).length;
+
+      let done = 0;
+      if(enrolled) done = 1;
+      if(taken === 5) done = Math.max(done, 2);
+
+      const pct = (done/5)*100;
+      stepsProgressBar.style.width = pct + '%';
+      stepsProgressLabel.textContent = `${done}/5`;
+      markLinearState(done);
+    }
+
+    async function captureCurrent(){
+      const key = currentActiveKey();
+      await captureAngle(key);
+      const next = angles.find(a=>!captures[a.key]);
+      if(next) highlightActive(next.key); else showToast('Captured all 5 angles 👌');
+    }
 
     async function captureAngle(key){
       if(!stream){showToast('Open the camera first');return;}
-      const track=stream.getVideoTracks()[0];
-      const w=1280,h=720;
-      canvas.width=w;canvas.height=h;
-      const ctx=canvas.getContext('2d');
+      const track = stream.getVideoTracks()[0];
+      const w = track.getSettings().width || 1280;
+      const h = track.getSettings().height || 720;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
       ctx.drawImage(video,0,0,w,h);
-      const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',0.9));
+      const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.92));
       captures[key]=blob;
-      const refs=angleCards[key];
-      refs.img.src=URL.createObjectURL(blob);
+
+      const refs = angleCards[key];
+      refs.img.src = URL.createObjectURL(blob);
       refs.img.classList.remove('hidden');
       refs.ph.classList.add('hidden');
       refs.btnRetake.classList.remove('hidden');
-      showToast(`Captured ${key}`);
+      highlightActive(key);
+      showToast(`Captured: ${angles.find(a=>a.key===key).title}`);
+
+      updateStepsProgress();
     }
 
-    openCameraBtn.addEventListener('click',openCamera);
-    captureBtn.addEventListener('click',()=>captureAngle('front'));
+    openCameraBtn.addEventListener('click', openCamera);
+    captureBtn.addEventListener('click', captureCurrent);
+    Object.entries(angleCards).forEach(([k,refs])=>refs.wrap.addEventListener('click',()=>highlightActive(k)));
+
+    ['fullName','studentId','schoolEmail'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', updateStepsProgress);
+    });
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!captures.front||!captures.left||!captures.right||!captures.up||!captures.down){
+        showToast('Please capture all 5 angles.'); return;
+      }
+      submitBtn.disabled=true; submitBtn.textContent='Submitting...';
+
+      const fd = new FormData();
+      fd.append('full_name', document.getElementById('fullName').value.trim());
+      fd.append('student_id', document.getElementById('studentId').value.trim());
+      fd.append('school_email', document.getElementById('schoolEmail').value.trim());
+      Object.entries(captures).forEach(([k,blob])=>fd.append(`face_${k}`,blob,`${k}.jpg`));
+
+      try{
+        const res = await fetch('/api/register',{method:'POST',body:fd});
+        if(!res.ok) throw new Error(await res.text());
+        showToast('Registered successfully!');
+        stepsProgressBar.style.width = '100%';
+        stepsProgressLabel.textContent = '5/5';
+        markLinearState(5);
+        e.target.reset();
+      }catch(err){
+        console.error(err);
+        showToast('Submit failed. Please check server.');
+      }finally{
+        submitBtn.disabled=false; submitBtn.textContent='Sign up';
+      }
+    });
+
+    window.addEventListener('beforeunload',()=>{if(stream) stream.getTracks().forEach(t=>t.stop());});
+
+    // Promo video: auto pause to save CPU
+    (function(){
+      const hero = document.querySelector('.promo-frame video');
+      if(!hero) return;
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) hero.pause(); else hero.play().catch(()=>{});
+      });
+      const io = new IntersectionObserver(([e])=>{
+        if(!e) return;
+        if(e.intersectionRatio < 0.4) hero.pause(); else hero.play().catch(()=>{});
+      }, {threshold:[0, .4, 1]});
+      io.observe(hero);
+    })();
   </script>
 </body>
 </html>
