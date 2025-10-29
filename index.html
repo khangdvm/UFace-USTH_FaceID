@@ -10,7 +10,6 @@
     :root{
       --u-blue:#2563eb; --u-sky:#60a5fa; --u-mint:#66e2d5; --u-violet:#8b5cf6;
     }
-    
     /* ===== Base UI ===== */
     .card{border:1px solid #e5e7eb;background:#fff;border-radius:16px}
     .input{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;outline:none}
@@ -81,9 +80,7 @@
     @media (prefers-reduced-motion:reduce){.promo-frame::before{animation:none} .blob{animation:none}}
 
     /* ===== FacePhoto card wider than inputs ===== */
-    /* Mobile/tablet: giữ 100% như form */
     #faceCard{width:100%;}
-    /* Desktop (>=1024px): rộng 120%, căn giữa bằng margin âm */
     @media (min-width:1024px){
       #faceCard{width:130%; margin-left:-10%;}
     }
@@ -113,13 +110,6 @@
     .step-card.is-active{border-color:rgba(59,130,246,.55); box-shadow:0 10px 22px rgba(59,130,246,.12), 0 1px 0 rgba(255,255,255,1) inset;}
     .step-card.is-done{border-color:rgba(16,185,129,.5);}
     .step-card.is-done .step-num{color:#065f46; border-color:#34d399; background:linear-gradient(180deg,#ecfdf5,#ffffff); box-shadow:0 1.5px 0 rgba(255,255,255,.95) inset, 0 2px 6px rgba(16,185,129,.18);}
-    /* ===== Align left and keep equal width ===== */
-    .form-block {
-  max-width: 520px; /* hoặc 540px tùy bạn */
-  width: 100%;
-  margin-left: 0;
-}
-
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white relative">
@@ -147,7 +137,7 @@
         <form id="registerForm" class="space-y-5">
           <div>
             <label class="mb-1 block text-sm text-gray-700">Full name</label>
-            <input id="fullName" class="input" placeholder="VD: Nguyễn Văn A" required />
+            <input id="fullName" class="input" placeholder="VD: Lê Vĩnh Khải" required />
           </div>
           <div>
             <label class="mb-1 block text-sm text-gray-700">Student ID</label>
@@ -158,7 +148,7 @@
             <input id="schoolEmail" type="email" class="input" placeholder="VD: KhaiLV@usth.edu.vn" required />
           </div>
 
-          <!-- Camera area (WIDER) -->
+          <!-- Camera area (FULL FILL) -->
           <div id="faceCard" class="card p-4 md:p-5 shadow-lg">
             <div class="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -173,10 +163,12 @@
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div class="relative col-span-7 overflow-hidden rounded-xl bg-black/5">
-                <div class="aspect-[4/3] w-full">
-                  <video id="video" autoplay playsinline class="h-full w-full object-cover rounded-xl"></video>
+                <!-- Height can be tuned; video fills 100% of this box -->
+                <div class="relative w-full h-[360px] md:h-[420px] lg:h-[460px] rounded-xl overflow-hidden">
+                  <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover rounded-xl"></video>
                   <canvas id="canvas" class="hidden"></canvas>
                 </div>
+
                 <div class="pointer-events-none absolute left-3 top-3 rounded bg-black/50 px-2 py-1 text-xs text-white">
                   <span id="statusBadge">Camera's off</span>
                 </div>
@@ -207,7 +199,8 @@
           </div>
 
           <button id="submitBtn" class="btn-primary shadow-md hover:shadow-lg transition">Sign up</button>
-          <p class="text-center text-xs text-gray-500">Already have an account? <a href="#" class="text-blue-600 hover:underline">Sign in</a></p>
+
+          <!-- Sign in prompt removed as requested -->
         </form>
       </div>
     </div>
