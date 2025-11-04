@@ -206,7 +206,7 @@
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if(Object.keys(captures).length < 5){showToast('Please capture all 5 angles.'); return;}
+      //if(Object.keys(captures).length < 5){showToast('Please capture all 5 angles.'); return;}
       submitBtn.disabled=true; submitBtn.textContent='Submitting...';
       const fd = new FormData();
       fd.append('full_name', document.getElementById('fullName').value.trim());
@@ -214,7 +214,8 @@
       fd.append('school_email', document.getElementById('schoolEmail').value.trim());
       Object.entries(captures).forEach(([k,blob])=>fd.append(`face_${k}`,blob,`${k}.jpg`));
       try{
-        const res = await fetch('/api/register',{method:'POST',body:fd});
+        const res = await fetch('http://localhost:5000/api/register',{method:'POST',body:fd}); 
+        
         if(!res.ok) throw new Error(await res.text());
         showToast('Registered successfully!');
         e.target.reset();
