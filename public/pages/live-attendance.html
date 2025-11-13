@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UFace – Live Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/assets/css/uface-theme.css">
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-blue-500 via-blue-100 to-white relative">
+    <!-- Background decor -->
+    <div class="decor" aria-hidden="true">
+      <div class="grid-dots"></div>
+      <span class="blob blob-1"></span>
+      <span class="blob blob-2"></span>
+      <span class="blob blob-3"></span>
+    </div>
+
+    <main class="relative z-10 h-[100dvh] px-4 py-3">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 h-full min-h-0">
+        
+        <!-- LEFT: Camera -->
+        <section class="card shadow-lg flex flex-col h-full min-h-0 bg-white/70 backdrop-blur-sm">
+          <header class="flex items-center justify-between p-3 border-b">
+            <div class="flex items-center gap-3">
+              <img src="/images/logo.png" class="h-7" />
+              <img src="/images/usth_logo.png" class="h-6" />
+              <div class="text-sm font-semibold text-gray-700 ml-2">Live Camera</div>
+              <span id="statusBadge" class="text-xs font-medium text-amber-600 bg-amber-100 rounded px-2 py-0.5">Camera's off</span>
+            </div>
+            <button id="openCamBtn" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Open camera</button>
+          </header>
+
+          <div class="relative bg-black/90 flex-1 min-h-0 rounded-b-2xl overflow-hidden">
+            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <div class="absolute bottom-3 right-3 text-xs text-white bg-black/50 rounded px-2 py-1">Lighting ↑ • Face centered</div>
+          </div>
+        </section>
+
+        <!-- RIGHT: Student list -->
+        <aside class="card shadow-lg flex flex-col h-full min-h-0 bg-white/70 backdrop-blur-sm">
+          <div class="p-4 border-b shrink-0">
+            <div class="flex items-center justify-between text-[13px] text-gray-800 font-medium mb-1">
+              <span>Students Present</span>
+              <span class="text-blue-600">Present: <span id="countPresent">0</span> | Total: <span id="countTotal">0</span></span>
+            </div>
+            <div class="text-xs text-black/70 font-semibold">
+              Class: ICT3.017 — A21-8-Auditorium • <span id="clock" class="text-gray-800"></span>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2">
+              <input id="searchBox" type="text" placeholder="Search name / ID..." 
+                class="flex-1 rounded-lg border border-gray-300 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+              <select id="filterStatus" class="border border-gray-300 rounded-lg px-2 py-1 text-sm">
+                <option value="all">All</option>
+                <option value="present">Present</option>
+                <option value="late">Late</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Scrollable list -->
+          <div id="listWrap" class="flex-1 min-h-0 overflow-y-auto p-3 space-y-2">
+            <!-- injected items -->
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <div id="toast" class="hidden fixed left-1/2 top-6 -translate-x-1/2 rounded-lg bg-black/80 text-white text-sm px-4 py-2 z-50"></div>
+
+    <script src="/assets/js/camera.js"></script>
+    <script src="/assets/js/attendance_demo.js"></script>
+  </body>
+</html>
